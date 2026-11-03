@@ -430,9 +430,17 @@ ls -l sample.txt    # 해당 권한은 시스템 umask에 따라 달라질 수 �
  - ex) 777 - 022 = 755 (rwxr-xr-x), 666 - 022 = 644 (rw-r--r--)
  - `umask` 명령어로 마스크 값 확인 가능
 
+```text
+왜 일반 파일 생성 시, 기본 최고 권한이 777이 아닌 666(rw-rw-rw-) 일까?
+
+보안 방지
+- 악성 스크립트가 별도의 권한 부여 없이 즉시 실행 가능한 상태가 됨
+- 악성 웹쉘(WebShell) 파일(script.php 등)을 업로드 후 바로 실행해 서버 제어권을 탈취할 수 있음
+```
+
 ```bash
 chmod 400 sample.txt
-printf 'New line\n' >> sample.txt   # >>는 기존 파일의 끝에 내용을 추가하는 연산자
+printf 'New line\n' >> sample.txt   # >> 는 기존 파일의 끝에 내용을 추가하는 연산자
 
 # 권한 오류 발생
 # Permission denied
@@ -444,3 +452,44 @@ cat sample.txt
 
 ## 실습 - 디렉터리 실행 권한의 역할
 
+### Step 1. 디렉터리 생성
+
+```bash
+cd ~/cloud-lab/week01/permissions
+mkdir private
+chmod 700 private
+ls -ld private    # -ld 는 디렉터리 자체의 상세 정보 출력
+```
+
+- 현재 디렉터리 권한 : `drwx------`
+
+### Step 2. 디렉터리 탐색 권한 제거
+
+```bash
+chmod 600 private
+ls -ld private
+```
+
+```text
+-bash: cd: private: Permission denied
+```
+
+- `private` 디렉터리에는 읽기와 쓰기 권한이 있지만 `x` 권한이 없어 내부로 진입 불가능
+
+### Step 3. 권한 복구
+
+```bash
+chmod 700 private
+cd private
+pwd
+```
+
+정상적으로 `/home/user/cloud-lab/week01/permissions/private` 경로가 출력됨
+
+## chmod, chown, chgrp의 차이
+
+| 명령어 | 역할 | 예시 |
+| --- | --- | --- |
+| `chmod` | 파일 접근 권한 변경 | `chmod 640 file.txt` |
+| `chown` | 파일 소유자 변경 | `chown alice flie.txt` |
+| `chgrp` | 파일 소유 그룹 변경 | `chgrp developers file.txt` |
