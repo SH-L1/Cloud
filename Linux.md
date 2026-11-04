@@ -1,26 +1,16 @@
 # Linux 기초 및 WSL2 Ubuntu 환경 구축
 
-> **학습 목표**
-> - Linux 커널과 배포판의 역할 이해
-> - PowerShell에서 WSL2 Ubuntu 실행
-> - Linux 기본 명령어와 파일 권한 실습
-
 ## 목차
 
 - [1. Linux란 무엇인가?](#1-linux란-무엇인가)
 - [2. WSL2란 무엇인가?](#2-wsl2란-무엇인가)
-- [실습 - 파일과 디렉터리 생성](#실습---파일과-디렉터리-생성)
 - [3. Linux 파일 시스템 심화](#3-linux-파일-시스템-심화)
-- [실습 - 파일 관리 및 장애 진단](#실습---파일-관리-및-장애-진단)
-- [사용자·그룹·권한 관리](#사용자그룹권한-관리)
-- [실습 - 사용자와 그룹 확인](#실습---사용자와-그룹-확인)
-- [파일과 디렉터리의 권한 차이](#파일과-디렉터리의-권한-차이)
-- [실습 - 파일 권한 변경과 오류 복구](#실습---파일-권한-변경과-오류-복구)
-- [실습 - 디렉터리 실행 권한의 역할](#실습---디렉터리-실행-권한의-역할)
-- [`chmod`, `chown`, `chgrp`의 차이](#chmod-chown-chgrp의-차이)
-- [APT 패키지 관리와 Git 기초](#apt-패키지-관리와-git-기초)
-- [Linux에서 프로그램을 설치하는 방식](#linux에서-프로그램을-설치하는-방식)
-- [`sudo`란](#sudo란)
+- [4. 사용자·그룹·권한 관리](#사용자그룹권한-관리)
+- [5. 파일과 디렉터리의 권한 차이](#파일과-디렉터리의-권한-차이)
+- [6. `chmod`, `chown`, `chgrp`의 차이](#chmod-chown-chgrp의-차이)
+- [7. APT 패키지 관리와 Git 기초](#apt-패키지-관리와-git-기초)
+- [8. Linux에서 프로그램을 설치하는 방식](#linux에서-프로그램을-설치하는-방식)
+- [9. `sudo`란](#sudo란)
 
 ## 1. Linux란 무엇인가?
 
@@ -329,7 +319,7 @@ find . -type f -name "*.txt"
 - `*`는 임의의 문자열을 나타내는 와일드카드
 - 따옴표로 감싸면 셸이 `*`를 먼저 확장하지 않고 `find`에 패턴을 전달
 
-## 사용자·그룹·권한 관리
+## 4. 사용자·그룹·권한 관리
 
 ### Linux의 사용자 권한 구분
 
@@ -416,7 +406,7 @@ uid=1000(user) gid=1000(user) groups=1000(user),27(sudo)
   3. 둘 다 해당하지 않으면 기타 사용자 권한 확인
 - 세 범위의 권한을 합산하지 않고, 사용자와 그룹 관계에 따라 해당하는 한 범위의 권한을 적용
 
-## 파일과 디렉터리의 권한 차이
+## 5. 파일과 디렉터리의 권한 차이
 
 - `rwx`의 의미는 일반 파일과 디렉터리에서 다름
 
@@ -515,7 +505,7 @@ pwd
 
 - 현재 경로가 `/home/user/cloud-lab/week01/permissions/private`와 같이 출력됨
 
-## chmod, chown, chgrp의 차이
+## 6. chmod, chown, chgrp의 차이
 
 | 명령어 | 역할 | 예시 |
 | --- | --- | --- |
@@ -539,7 +529,7 @@ bash script.sh
   - 웹 서버 프로세스가 파일 소유자이거나 파일의 소유 그룹에 속해야 함
   - 파일까지 이어지는 상위 디렉터리에 필요한 탐색(`x`) 권한이 있어야 함
 
-## APT 패키지 관리와 Git 기초
+## 7. APT 패키지 관리와 Git 기초
 
 - **APT**
   - Debian 및 Ubuntu 계열에서 패키지를 설치·업데이트·삭제하는 패키지 관리자
@@ -549,7 +539,7 @@ bash script.sh
 - **Git**
   - 파일과 코드의 변경 이력을 관리하고 이전 상태를 추적하는 버전 관리 시스템
 
-## Linux에서 프로그램을 설치하는 방식
+## 8. Linux에서 프로그램을 설치하는 방식
 
 - Windows에서 `.exe` 또는 `.msi` 설치 파일을 사용하는 것처럼, Linux에서는 APT로 패키지를 설치할 수 있음
 
@@ -567,7 +557,7 @@ APT: 패키지 목록·버전·의존성 확인
 
 - `apt`는 로컬 패키지 목록을 참고해 필요한 패키지와 의존성을 계산
 - 필요한 패키지가 로컬에 없으면 설정된 저장소에서 다운로드
-- 저장소 설정은 `/etc/apt/sources.list` 또는 `/etc/apt/sources.list.d/` 아래에서 관리
+- 저장소 설정은 `/etc/apt/sources.list` 또는 `/etc/apt/sources.list.d/` 아래에서 관리 (로컬 캐시에 저장)
 - APT는 `dpkg`를 이용해 패키지를 설치하고 패키지 데이터베이스를 관리
 
 ### APT의 주요 명령어
@@ -589,7 +579,7 @@ APT: 패키지 목록·버전·의존성 확인
 - `apt upgrade`
   - 갱신된 목록을 바탕으로 설치된 패키지를 실제로 업그레이드
 
-## sudo란
+## 9. sudo란
 
 ```bash
 sudo apt install git
@@ -604,4 +594,144 @@ sudo apt install git
 
 - `sudo`는 현재 계정을 영구적으로 `root`로 전환하지 않음
 - 지정한 명령만 관리자 권한으로 실행
-- 일반 작업은 일반 사용자 권한으로 수행하고, 시스템 변경이 필요할 때만 관리자 권한 사용
+- 일반 작업은 일반 사용자 권한으로 수행하고, 시스템 변경이 필요할 때만 관리자 권한
+
+## 실습 - APT로 Git 설치
+
+### Step 1. APT와 Gir 설치 상태 확인
+
+```bash
+apt --version
+git --version
+```
+
+### Step 2. 패키지 목록 갱신
+
+```bash
+sudo apt update
+```
+
+### Step 3. Git 설치
+
+```bash
+sudo apt install git
+
+git --version
+
+# Git 패키지의 메타데이터 조회
+apt show git
+```
+
+#### 오류 메세지
+
+| 오류 | 원인 | 우선 확인 |
+| --- | --- | --- |
+| `Permission denied` | 관리자 권한 부족 | `sudo` 사용 여부 |
+| `Unable to locate package` | 패키지 목록 또는 저장소 문제 | `sudo apt update` 결과 |
+| `Temporary failure resolving` | DNS·네트워크 문제 | WSL 네트워크 연결 |
+| `Could not get lock` | 다른 패키지 관리 작업이 진행 중 | 다른 APT 프로세스 유무 |
+
+## 10. Git의 필요성
+
+AWS에 서버를 구축하면서 다음과 같은 파일을 만들게 됨
+
+```text
+cloud-infrastructure/
+├── README.md
+├── terraform/
+│   ├── main.tf
+│   └── variables.tf
+├── scripts/
+│   └── deploy.sh
+└── nginx/
+    └── default.conf
+```
+
+서버 설정 변경 후 장애 발생 시, 어떤 설정이 문제를 일으켰는지 알아야 함
+Git은 파일 변경 이력을 기록하는 버전 관리 시스템
+이를 이용하여
+   - 어떤 파일이 변경되었는지 확인
+   - 변경 내용을 기록
+   - 이전 버전과 비교
+   - 필요한 경우 이전 상태로 복구
+   - GitHub 등의 원격 저장소와 협업
+  
+## 11. Git의 핵심 구조
+
+- Working Directory(작업 디렉터리) : 실제 파일 수정
+- Staging Area(스테이징 영역) : 커밋할 변경 선택
+- Repository(저장소) : 커밋 이력 저장
+
+`git add`는 변경 내용을 다음 커밋에 포함하도록 스테이징(다음 커밋에 기록할 변경 사항을 담아두는 작업)하는 작업
+`git commit`은 스테이징된 내용을 저장소의 변경 이력으로 기록
+
+## 실습 - Git 저장소 구축
+
+### Step 1. 실습 디렉터리 생성
+
+```bash
+mkdir ~/cloud-lab/week01/git-lab
+cd ~/cloud-lab/week01/git-lab
+
+# Git 저장소 생성 및 초기 브랜치 main으로 명명
+git init -b main    # branch main
+```
+
+과정 중에 `.git`이라는 숨김 디렉터리가 생성됨
+`ls -la` 명령으로 확인 가능
+
+### Step 2. Git 사용자 정보 설정
+
+```bash
+# 현재 디렉터리(Git 저장소)에서 커밋할 때 기록될 내 이름을 설정
+git config --local user.name "Linux Learner"
+
+# 현재 디렉터리에서 커밋할 때 내 이름 밑에 넘갈 연락처(이메일)를 설정 
+git config --local user.email "learner@example.invalid"
+
+# .git/config 파일에 저장된 모든 설정값을 키-값 형태로 출력
+git config --local --list
+```
+
+`--local`은 현재 Git 저장소(현재 디렉터리)에만 설정을 적용한다는 의미
+`--global`은 내 계정 전체의 저장소에 설정을 적용한다는 의미
+
+### Step 3. 파일 생성
+
+```bash
+printf '# Cloud Linux Lab\n' > README.md
+git status
+```
+
+### Step 4. 오류 재현 및 해결
+
+`git add`를 실행하지 않아 스테이징 영역에 등록하지 않은 상태에서 커밋 시도
+
+```bash
+git commit -m "Initial Linux lab"
+```
+
+`git add`로 스테이징 영역에 등록 후 커밋
+
+```bash
+git add README.md
+git commit -m "Initial Linux lab"
+
+# 변경 이력 확인
+git log --oneline
+```
+
+### Step 5. 변경 후 내용 비교
+
+```bash
+printf 'Week 1: Linux basic\n' >> README.md
+git status
+
+# 작업 디렉터리와 스테이징 영역 사이의 변경된 내용 확인
+git diff
+
+git add README.md
+git diff --cached   # 스테이징된 변경 내용 확인
+git commit -m "Update Linux study notes"
+git log --oneline
+```
