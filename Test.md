@@ -43,6 +43,8 @@ cat docs/server-v2.txt
 ## 디렉터리 접근 권한 오류
 
 ```bash
+cd ~/cloud-lab/week01/final-lab
+
 chmod 600 logs
 cd ~/cloud-lab/week01/final-lab/logs
 
@@ -57,6 +59,8 @@ pwd
 ```bash
 cd ~/cloud-lab/week01/final-lab
 git init -b main
+git config --local user.name "Admin"
+git config --local user.email "example@example.com"
 
 git add .
 git commit -m "Initial server environment"
