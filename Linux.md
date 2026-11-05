@@ -173,7 +173,7 @@ cat notes.txt
 | 구분 | 실제 값 | 의미 |
 | --- | --- | --- |
 | 파일 종류 | - | 일반 파일 |
-| 소유자 권한 | rw- | 읽기, 쓰기 가능 |
+| 소유자 권한 | rw- | 읽기·쓰기 가능 |
 | 그룹 권한 | r-- | 읽기 가능 |
 | 기타 사용자 권한 | r-- | 읽기 가능 |
 | 소유자 | user | 파일 소유 계정 |
@@ -596,6 +596,15 @@ sudo apt install git
 - 지정한 명령만 관리자 권한으로 실행
 - 일반 작업은 일반 사용자 권한으로 수행하고, 시스템 변경이 필요할 때만 관리자 권한
 
+### 왜 모든 명령을 sudo로 수행하면 안될까?
+
+모든 명령에 `sudo`를 붙이게 되면 일반 사용자가 수행해도 되는 작업까지 관리자 권한으로 실행하게 됨
+
+`sudo touch ~/cloud-lab/test.txt`
+
+이렇게 명령을 실행하면 `test.txt`가 `root` 소유로 생성될 수 있음
+그 결과, 일반 사용자 `user`로 수정하려고 할 때 권한 오류 발생
+
 ## 실습 - APT로 Git 설치
 
 ### Step 1. APT와 Gir 설치 상태 확인
@@ -727,11 +736,11 @@ git log --oneline
 printf 'Week 1: Linux basic\n' >> README.md
 git status
 
-# 작업 디렉터리와 스테이징 영역 사이의 변경된 내용 확인
+# 작업 디렉터리와 스테이징 되지 않은 변경 사항 비교
 git diff
 
 git add README.md
-git diff --cached   # 스테이징된 변경 내용 확인
+git diff --cached   # 스테이징된 변경 내용 비교
 git commit -m "Update Linux study notes"
 git log --oneline
 ```
