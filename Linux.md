@@ -1249,3 +1249,184 @@ print(app_env, port)
 ```
 
 서버 프로그램은 이 값을 읽어 어떤 환경에서 실행되는지, 어느 포트를 사용할지 결정할 수 있음
+
+## systemd와 Linux 서비스 관리
+
+### 프로세스와 서비스의 차이점
+
+```bash
+sleep 180 &
+```
+
+위 방식은 단순히 프로세스를 실행하는 것일뿐,
+서버 운영에 필요한 모든 기능(재실행, 자동실행 등)을 제공하지 못함
+이를 해결하는데 사용하는 대표 도구가 `systemd`
+
+```text
+systemd (서비스 실행·종료·재시작·상태 관리)
+->
+HTTP 서비스 (python3 프로세스) DB서비스 (DB 서버 프로세스)
+```
+
+서비스는 특정 프로세스 자체와 동일한 개념이 아님
+예를 들어, `cloud-lab-http.service`라는 서비스를 재시작하면 기존 서비스는 종료되고 새로운 PID를 가진 프로세스가 실행될 수 있음
+그러나 서비스 이름은 유지됨
+이것이 서버 운영에서 **서비스 이름을 기준으로 관리하는 이유** 중 하나
+
+### systemd와 systemctl
+
+| 구성 요소 | 역할 |
+| --- | --- |
+| `systemd` | 시스템 초기화 및 서비스 관리 기능(서비스의 실행 상태, 의존성, 시작 순서, 재시작 정책 등) 제공 |
+| `systemctl` | systemd에 서비스 제어·조회 요청 |
+| `journalctl` | systemd 저널 로그 조회 |
+| `.service` 파일 | 서비스 실행 방법과 정책을 정의하는 Unit 파일 |
+
+특히, `systemctl`은 서비스 내부에서 실행되는 기능이 아니라
+`systemd` 관리자를 제어하는 별도의 명령어임
+
+```bash
+sudo systemctl start 서비스명     # 서비스 실행
+sudo systemctl stop 서비스명      # 서비스 종료
+sudo systemctl restart 서비스명   # 서비스 재시작
+
+systemctl status 서비스명
+```
+
+```bash
+# 지금 서비스를 시작하는 명령
+sudo systemctl start example.service
+
+# Unit에 정의된 설치 설정에 따라 부팅 시 자동 시작되도록 구성하는 명령
+sudo systemctl enable example.service
+```
+
+`systemctl start`와 `systemctl enable`의 차이점
+ - `systemctl start`: 지금 서비스를 즉시 시작
+ - `systemctl enable`: 부팅 시 자동 시작되도록 구성
+ - `systemctl enable --now`: 자동 시작 구성 + 지금 실행
+ - `systemctl disable`: 자동 시작 구성 해제 (실행 중인 서비스는 유지)
+
+## 실습 - HTTP 서버 서비스 등록
+
+### Step 1. 서버 파일 준비
+
+```bash
+mkdir -p ~/cloud-lab/week02/lesson03
+cd ~/cloud-lab/week02/lesson03
+
+printf 'Cloud Lab HTTP Server\n' > index.html
+```
+
+### Step 2. 서비스 설정 파일 생성
+
+```bash
+sudo nano /etc/systemd/system/cloud-lab-http.service
+```
+
+```INI
+[Unit]
+Description=Cloud Lab HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/cloud-lab/week02/lesson03
+ExecStart=/usr/bin/python3 -m http.server 8765 --bind 127.0.0.1
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+```
+
+| 항목 | 역할 |
+| --- | --- |
+| `Description` | 서비스 설명 |
+| `After` | 해당 대상 이후에 시작 순서 배치 |
+| `Type=simple` | 실행한 프로세스를 서비스의 주 프로세스로 관리 |
+| `User=user` | 일반 사용자 권한으로 실행 |
+| `WorkingDirectory` | 서버가 사용할 작업 디렉터리 |
+| `ExecStart` | 서비스 시작 시 실행할 명령 |
+| `Restart=on-failure` | 실패로 종료되면 자동 재시작 |
+| `RestartSec=2` | 재시작 전 대기 시간 2초 |
+
+### Step 3. systemd에 설정 반영
+
+```bash
+# systemd가 Unit 파일 설정을 다시 읽게 함
+sudo systemctl daemon-reload
+
+# 서비스 실행
+sudo systemctl start cloud-lab-http.service
+
+# --no-pager로 한 페이지에 내용 전체 출력
+systemctl status cloud-lab-http.service --no-pager
+
+# 웹 서버 응답 확인
+curl http:127.0.0.1:8765/
+```
+
+## 실습 - 서비스 장애 재현 및 자동 복구
+
+### Step 1. 현재 PID 확인
+
+```bash
+systemctl show cloud-lab-http.service -p MainPID
+```
+
+복구 전, PID 값 확인
+
+### Step 2. 의도적인 비정상 종료
+
+```bash
+# SIGKILL로 강제 종료
+sudo systemctl kill --signal=SIGKILL cloud-lab-http.service
+```
+
+설정 파일에서 작성한 정책대로
+systemd가 프로세스의 비정상 종료를 감지하고 재시작을 시도함
+
+### Step 3. 자동 복구 확인
+
+```bash
+systemctl status cloud-lab-http.service --no-pager
+systemctl show cloud-lab-http.service -p MainPID
+curl http://127.0.0.1:8765/
+```
+
+복구 후, PID는 새로운 값으로 바뀐 것을 확인할 수 있음
+
+### Step 4. 로그로 원인 추적
+
+```bash
+# 서비스의 최근 로그 30줄 출력
+sudo journalctl -u cloud-lab-http.service -n 30 --no-pager
+```
+
+서비스가 자동으로 재시작되었다고 해서 근본적인 장애 원인이 해결된 것은 아님
+
+### Step 5. 정상 종료와 비교
+
+```bash
+sudo systemctl stop cloud-lab-http.service
+systemctl status cloud-lab-http.service --no-pager
+```
+
+관리자가 명시적으로 서비스를 중지했기 때문에
+`Restart=on-failure` 정책에 해당하지 않음
+그래서 `SIGKILL`로 강제 종료했던 것과 달리 자동으로 다시 시작되지 않음
+
+```bash
+sudo systemctl start cloud-lab-http.service
+```
+
+해당 명령으로 서비스 재시작
+
+## 로그 보관 정책
+
+설정한 서비스 파일 내 정책에서 로그 보관 기간이나 저장 위치를 명시하지 않았음
+그런데도, `sudo journalctl 0-u cloud-lab-http.service`로 로그 조회가 가능함
+그 이유는 **서비스별 Unit 파일에서 로그 저장 정책을 지정하지 않아도, systemd와 연동되는 로깅 시스템이 별도로 작동하기 때문**임
+
