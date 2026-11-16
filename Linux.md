@@ -1188,3 +1188,64 @@ Bash가 `ls` 프로그램이 실제로 어디있는지 알 수 있는 이유
 => **PATH 환경변수**
 
 PATH는 명령어 이름만 입력했을 때 실행 파일을 검색할 디렉터리 목록을 저장함
+
+### PATH 구조
+
+```bash
+echo "$PATH"
+```
+
+내가 저장한 환경변수들의 경로를 확인할 수 있음
+각 경로들은 `:`로 구분됨
+
+#### 외부 실행 파일 탐색
+
+```text
+사용자가 ls 입력 ->
+Bash가 실행할 명령을 확인 ->
+PATH에 포함된 디렉터리 검색(/usr/local/bin) ->
+프로그램 실행
+```
+
+## 실습 - PATH 확인
+
+```bash
+echo "$PATH"
+command -v ls
+type ls
+```
+
+`command -v ls` : Bash가 `ls`를 실행할 때 사용하는 명령의 위치나 정보를 출력
+`type ls` : 해당 명령이 외부 프로그램인지, 셀 내장 명령인지, 별칭인즈 등을 구분
+
+### PATH가 없으면 어떻게 될까?
+
+```bash
+# 실행 파일 검색 경로가 잘못된 자식 Bash 생성
+env PATH=/nonexistent /bin/bash -c 'ls'
+```
+
+```text
+# 오류 출력
+/bin/bash: line 1: ls: command not found
+```
+
+자식 Bash의 PATH를 존재하지 않는 디렉터리로 지정했기 떄문에 `ls` 프로그램 검색 불가
+
+## 환경변수와 실제 서버 운영의 관계
+
+```bash
+export APP_ENV=development
+export PORT=8080
+```
+
+```python
+import os
+
+app_env = os.environ.get("APP_ENV", "development")
+port = int(os.environ.get("PORT", "8080"))
+
+print(app_env, port)
+```
+
+서버 프로그램은 이 값을 읽어 어떤 환경에서 실행되는지, 어느 포트를 사용할지 결정할 수 있음
